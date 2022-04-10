@@ -4,13 +4,114 @@
 - 3- install firebase  
 - 4-
 
+## search and see usehook.com to understand more  
+## search and see react firebase hook ,then go to github then read  
+
 # auth by form  
 - log in - already user 
 - resister  first time then resister    
 - sign in - already user  
 - sign up first time then resister 
 
-### js password validation regex  
+## manually creating custom hooks for auth  but we do not use this ,,instaide we use react firebase hook  
+- hooks> useFirebase.js
+```
+import { useEffect, useState } from "react"
+import app from "../firebase.init"
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+
+const auth = getAuth(app)
+const googleProvider = new GoogleAuthProvider()
+
+const useFirebase=()=>{
+    const [user, setUser]=useState({})
+
+  
+     const signInWithGoogle=()=>{
+         signInWithPopup(auth,googleProvider)
+         .then(result=>{
+             const user = result.user;
+             setUser(user)
+             console.log(user)
+         })
+         .catch()
+     }
+    const handleSignOut=()=>{
+        signOut(auth)
+        .then(()=>{})
+    }
+
+     useEffect(()=>{
+        onAuthStateChanged(auth, user=>{
+          setUser(user)  
+        })
+     },[])
+
+    //  return [user, setUser];
+       return {
+           user, 
+           signInWithGoogle,
+           handleSignOut
+       }    
+
+}
+export default useFirebase;
+```
+- components>login>Login.js  
+```
+import React from 'react';
+import useFirebase from '../../hooks/useFirebase';
+
+const Login = () => {
+    const {signInWithGoogle}= useFirebase()
+    return (
+        <div>
+            <h2>from login</h2>
+            <div style={{margin:'20px'}}>
+                    <button onClick={signInWithGoogle}>google signin</button>
+            </div>
+            <form>
+               <input type="email" placeholder='email'/>
+                <br />
+                <input type="password" placeholder='password' />
+                <br />
+                <input type="submit" value="Login" />
+            </form>
+        </div>
+    );
+};
+
+export default Login;
+```
+- components> header>Header.js  
+```
+import React from 'react';
+import { Link } from 'react-router-dom';
+import useFirebase from '../../hooks/useFirebase';
+import './Header.css'
+
+const Header = () => {
+    const {user, handleSignOut}=useFirebase()
+    return (
+        <div className='header'>
+            <nav>
+                <Link to="/">Home</Link>
+                <Link to="/products">Products</Link>
+                <Link to="/orders">Order</Link>
+                <Link to="/register">Register</Link>
+                <span>{user?.displayName && user.displayName}</span>
+                {
+                    user?.uid ?  <button onClick={handleSignOut}>sign out</button>
+                    :
+                    <Link to="/login">Login</Link>
+                }
+            </nav>
+        </div>
+    );
+};
+
+export default Header;
+```
 
 # Getting Started with Create React App
 
