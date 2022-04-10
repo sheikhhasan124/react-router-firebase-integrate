@@ -113,6 +113,48 @@ const Header = () => {
 export default Header;
 ```
 
+## we are using react firebase hooks  
+- 1- install:npm install --save react-firebase-hooks
+- required auth file  
+```
+import { getAuth } from 'firebase/auth';
+import React from 'react';
+import {useAuthState} from 'react-firebase-hooks/auth'
+import { Navigate, useLocation } from 'react-router-dom';
+import app from '../../firebase.init';
+
+const auth = getAuth(app)
+
+const RequireAuth = ({children}) => {
+    const [user]= useAuthState(auth)
+    const location = useLocation()
+     if(!user){
+        return <Navigate to="/login" state={{from:location}} replace></Navigate>
+     }
+
+    return children;
+};
+
+export default RequireAuth;
+```
+- requirer  
+```
+           <Routes>
+                <Route path='/' element={<Home></Home>}></Route>
+                <Route path='/login' element={<Login></Login>}></Route>
+                <Route path='/register' element={<Register></Register>}></Route>
+                <Route path='/orders' element={
+                    <RequireAuth>
+                        <Orders></Orders>
+                    </RequireAuth>
+                }></Route>
+            </Routes>
+        </div>
+    );
+};
+
+```
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
